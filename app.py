@@ -57,7 +57,7 @@ from google.cloud import monitoring_v3
 
 # import time
 
-client = monitoring_v3.MetricServiceClient()
+# client = monitoring_v3.MetricServiceClient()
 # project_name = f"projects/greenlink-platform-396912"
 # now = time.time()
 # seconds = int(now)
