@@ -10,7 +10,7 @@ aggregation = monitoring_v3.Aggregation(
        "alignment_period": {"seconds": 60*10},  
        "per_series_aligner": monitoring_v3.Aggregation.Aligner.ALIGN_MEAN,
    }
-   )
+)
 def get_cpu_utilization(project_id, instance_id, time_interval_minutes):
     
 
@@ -77,9 +77,46 @@ def get_memory_utilization(project_id, instance_id, time_interval_minutes):
             print(point.value.double_value)
 
 
+def get_container_cpu_utilization(project_id, namespace_name, container_name, time_interval_minutes):
+    
+    interval = monitoring_v3.TimeInterval()
+    end_time = Timestamp()
+    end_time.FromDatetime(datetime.utcnow())
+    interval.end_time = end_time
+
+    start_time = Timestamp()
+    start_time.FromDatetime(datetime.utcnow() - timedelta(minutes=int(time_interval_minutes)))
+    interval.start_time = start_time
+
+    metric_type = "kubernetes.io/container/cpu/limit_utilization"
+    query = ( f'resource.type="k8s_container" AND resource.labels.namespace_name={namespace_name} '
+               f'AND resource.labels.cluster_name="greenlink-project-cluster" AND resource.labels.container_name="{container_name}" '
+               f'AND metric.type="{metric_type}" '
+    )
+    request={
+            "name": project_name,
+            "filter": query,
+            "interval": interval,
+            "view": monitoring_v3.ListTimeSeriesRequest.TimeSeriesView.FULL,
+            "aggregation": aggregation,
+    }
+
+    results = client.list_time_series(
+        request=request
+    )
+
+    for result in results:
+        print(result)
+        for point in result.points:
+            print(point.value.double_value * 100)
+
 if __name__ == "__main__":
     project_id = "greenlink-platform-396912"
     instance_id = "4567250453145400611"
-    time_interval_minutes = "10"
+    time_interval_minutes = "11"
+    container_name = "task-queue"
+    namespace_name = "staging"
+
     get_cpu_utilization(project_id, instance_id, time_interval_minutes)
     get_memory_utilization(project_id, instance_id, time_interval_minutes)
+    get_container_cpu_utilization(project_id, namespace_name, container_name, time_interval_minutes)
