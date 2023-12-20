@@ -55,29 +55,29 @@
 
 from google.cloud import monitoring_v3
 
-# import time
+import time
 
-# client = monitoring_v3.MetricServiceClient()
-# project_name = f"projects/greenlink-platform-396912"
-# now = time.time()
-# seconds = int(now)
-# nanos = int((now - seconds) * 10**9)
-# interval = monitoring_v3.TimeInterval(
-#     {
-#         "end_time": {"seconds": seconds, "nanos": nanos},
-#         "start_time": {"seconds": (seconds - 600 ), "nanos": nanos},
-#     }
-# )
-# results = client.list_time_series(
-#     request={
-#         "name": project_name,
-#         "filter": 'metric.type = "compute.googleapis.com/instance/cpu/utilization" AND metric.label.instance_name = "gk3-greenlink-project-cluster-pool-3-c32be58c-54ef"',
-#         "interval": interval,
-#         "view": monitoring_v3.ListTimeSeriesRequest.TimeSeriesView.FULL,
-#     }
-# )
-# for result in results:
-#     print(result)
+client = monitoring_v3.MetricServiceClient()
+project_name = f"projects/greenlink-platform-396912"
+now = time.time()
+seconds = int(now)
+nanos = int((now - seconds) * 10**9)
+interval = monitoring_v3.TimeInterval(
+    {
+        "end_time": {"seconds": seconds, "nanos": nanos},
+        "start_time": {"seconds": (seconds - 240 ), "nanos": nanos},
+    }
+)
+results = client.list_time_series(
+    request={
+        "name": project_name,
+        "filter": 'metric.type = "compute.googleapis.com/instance/cpu/utilization" ',
+        "interval": interval,
+        "view": monitoring_v3.ListTimeSeriesRequest.TimeSeriesView.FULL,
+    }
+)
+for result in results:
+    print(result)
 #     for point in result.points:
 #         print(point.value.double_value)
 
