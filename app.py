@@ -53,9 +53,9 @@
 # if __name__ == '__main__':
 #     app.run(debug=True)
 
-from google.cloud import monitoring_v3
-
 import time
+
+from google.cloud import monitoring_v3
 
 client = monitoring_v3.MetricServiceClient()
 project_name = f"projects/greenlink-platform-396912"
@@ -65,7 +65,7 @@ nanos = int((now - seconds) * 10**9)
 interval = monitoring_v3.TimeInterval(
     {
         "end_time": {"seconds": seconds, "nanos": nanos},
-        "start_time": {"seconds": (seconds - 240 ), "nanos": nanos},
+        "start_time": {"seconds": (seconds - 240), "nanos": nanos},
     }
 )
 results = client.list_time_series(

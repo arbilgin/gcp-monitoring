@@ -2,15 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoring Dashboard</title>
+    <title>Table without Borders</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: none;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #F2F2F2;
+        }
+    </style>
 </head>
 <body>
-    <h1>Monitoring Dashboard</h1>
-    <h2>CPU Utilization</h2>
-    <p>{{ cpu_data }}</p>
-    <textarea rows="10" cols="2" name="multi_line_data">{{ cpu_data }}</textarea>
-    <h2>Memory Utilization</h2>
-    <p>{{ memory_data }}</p>
+    <h1>GCP Monitoring</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Server</th>
+                <th>Env</th>
+                <th>CPU Usage/Limit</th>
+                <th>Memory Usage/Limit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in response %}
+                <tr>
+                    <td>{{ entry['machine_name'] }}</td>
+                    <td>{{ entry['environment'] }}</td>
+                    <td>{{ entry['cpu_usage'] }}/{{ entry['cpu_limit'] }}</td>
+                    <td>{{ entry['memory_usage'] }}/{{ entry['memory_limit'] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
 </html>
