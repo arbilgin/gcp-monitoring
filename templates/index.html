@@ -26,18 +26,18 @@
         <thead>
             <tr>
                 <th>Server</th>
-                <th>Env</th>
-                <th>CPU Usage/Limit</th>
-                <th>Memory Usage/Limit</th>
+                <th>Environment</th>
+                <th>CPU Utilization/Limit</th>
+                <th>Memory Utilization/Limit</th>
             </tr>
         </thead>
         <tbody>
             {% for entry in response %}
                 <tr>
-                    <td>{{ entry['machine_name'] }}</td>
-                    <td>{{ entry['environment'] }}</td>
-                    <td>{{ entry['cpu_usage'] }}/{{ entry['cpu_limit'] }}</td>
-                    <td>{{ entry['memory_usage'] }}/{{ entry['memory_limit'] }}</td>
+                    <td>{{ entry['machine'] }}</td>
+                    <td>{{ entry['env'] }}</td>
+                    <td>{{ entry['cpu_utilization'] }}/{{ entry['cpu_limit'] }}</td>
+                    <td>{{ entry['memory_utilization'] }}/{{ entry['memory_limit'] }}</td>
                 </tr>
             {% endfor %}
         </tbody>

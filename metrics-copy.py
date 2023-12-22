@@ -278,12 +278,38 @@ def get_container_memory_utilization_prod():
             "{}%".format(round(result.points[-1].value.double_value * 100, 2)),
         )
 
+def get_container_cpu_limit_staging():
+        interval = monitoring_v3.TimeInterval()
+        end_time = Timestamp()
+        end_time.FromDatetime(datetime.utcnow())
+        interval.end_time = end_time
 
-if __name__ == "____":
+        start_time = Timestamp()
+        start_time.FromDatetime(
+            datetime.utcnow() - timedelta(minutes=int(time_interval_minutes))
+        )
+        interval.start_time = start_time
+        metric_type = "kubernetes.io/container/cpu/limit_cores"
+        query = f'resource.type="k8s_container" AND metric.type="{metric_type}" AND resource.labels.cluster_name="greenlink-project-cluster" AND resource.labels.namespace_name="staging" '
+        request = {
+            "name": project_name,
+            "filter": query,
+            "interval": interval,
+            "view": monitoring_v3.ListTimeSeriesRequest.TimeSeriesView.FULL,
+            "aggregation": aggregation,
+        }
+
+        results = client.list_time_series(request=request)
+
+        for result in results:
+            print(result)
+
+if __name__ == "__main__":
     get_cpu_utilization()
     get_memory_utilization()
     get_container_cpu_utilization_staging()
     get_container_cpu_utilization_prod()
     get_container_memory_utilization_staging()
     get_container_memory_utilization_prod()
+    get_container_cpu_limit_staging()
 #  app.run(debug=True)
