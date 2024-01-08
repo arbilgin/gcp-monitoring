@@ -16,10 +16,7 @@ class GoogleMetrics:
         self.project = project
         self.aggregation = aggregation
         self.interval = interval
-        self.data = {
-            "cpu_utilization": [],
-            "memory_utilization": [],
-        }
+        self.data = {}
 
     def get_cpu_utilization_for_vms(self) -> None:
         metric_type = "compute.googleapis.com/instance/cpu/utilization"
@@ -35,12 +32,14 @@ class GoogleMetrics:
             }
         )
         for vm in results:
-            self.data["cpu_utilization"].append(
-                {
-                    "machine": vm.metric.labels["instance_name"],
-                    "utilization": round(vm.points[-1].value.double_value * 100, 3),
-                }
-            )
+            machine_name = vm.metric.labels["instance_name"]
+            cpu_utilization = "{} %".format(round(vm.points[-1].value.double_value * 100, 3))
+            if machine_name in self.data:
+                self.data[machine_name]["cpu_utilization"] = cpu_utilization
+                self.data[machine_name]["env"] = "VM"
+            else:
+                self.data[machine_name] = {"cpu_utilization": cpu_utilization}
+                self.data[machine_name]["env"] = "VM" 
         return None
 
     def get_memory_utilization_for_vms(self) -> None:
@@ -57,12 +56,34 @@ class GoogleMetrics:
         results = self.client.list_time_series(request=request)
 
         for result in results:
-            self.data["memory_utilization"].append(
-                {
-                    "machine": result.resource.labels["instance_id"],
-                    "utilization": round(result.points[-1].value.double_value, 3),
-                }
+            metric_type = "compute.googleapis.com/instance/cpu/utilization"
+            instance_id = result.resource.labels["instance_id"]
+            filter = f'metric.type="{metric_type}" AND resource.labels.instance_id="{instance_id}"'
+            outcomes = self.client.list_time_series(
+                name=self.project,
+                filter=filter,
+                interval=self.interval,
+                view=ListTimeSeriesRequest.TimeSeriesView.FULL,
             )
+            for outcome in outcomes:
+                machine_name = outcome.metric.labels["instance_name"]
+            
+            memory_utilization = "{} %".format(round(result.points[-1].value.double_value, 3))
+            if machine_name in self.data:
+                self.data[machine_name]["memory_utilization"] = memory_utilization
+                self.data[machine_name]["env"] = "VM"
+            else:
+                self.data[machine_name] = {"memory_utilization": memory_utilization}
+                self.data[machine_name]["env"] = "VM" 
+
+            # machine_name = result.resource.labels["instance_id"]
+            # memory_utilization = round(result.points[-1].value.double_value, 3)
+            # if machine_name in self.data:
+            #     self.data[machine_name]["memory_utilization"] = memory_utilization
+            #     self.data[machine_name]["env"] = "VM"
+            # else:
+            #     self.data[machine_name] = {"memory_utilization": memory_utilization}
+            #     self.data[machine_name]["env"] = "VM" 
         return None
 
     def get_container_cpu_utilization_staging(self) -> None:
@@ -79,13 +100,15 @@ class GoogleMetrics:
         results = self.client.list_time_series(request=request)
 
         for result in results:
-            self.data["cpu_utilization"].append(
-                {
-                    "machine": result.resource.labels["container_name"],
-                    "utilization": round(result.points[-1].value.double_value, 3),
-                    "env": result.resource.labels["namespace_name"],
-                }
-            )
+            machine_name = result.resource.labels["container_name"]
+            cpu_utilization = round(result.points[-1].value.double_value, 3)
+            env = result.resource.labels["namespace_name"]
+            if machine_name in self.data:
+                self.data[machine_name]["cpu_utilization"] = cpu_utilization
+                self.data[machine_name]["env"] = env
+            else:
+                self.data[machine_name] = {"cpu_utilization": cpu_utilization}
+                self.data[machine_name]["env"] = env
         return None
 
     def get_container_cpu_utilization_prod(self) -> None:
@@ -102,13 +125,15 @@ class GoogleMetrics:
         results = self.client.list_time_series(request=request)
 
         for result in results:
-            self.data["cpu_utilization"].append(
-                {
-                    "machine": result.resource.labels["container_name"],
-                    "utilization": round(result.points[-1].value.double_value, 3),
-                    "env": result.resource.labels["namespace_name"],
-                }
-            )
+            machine_name = result.resource.labels["container_name"]
+            cpu_utilization = round(result.points[-1].value.double_value, 3)
+            env = result.resource.labels["namespace_name"]
+            if machine_name in self.data:
+                self.data[machine_name]["cpu_utilization"] = cpu_utilization
+                self.data[machine_name]["env"] = env
+            else:
+                self.data[machine_name] = {"cpu_utilization": cpu_utilization}
+                self.data[machine_name]["env"] = env
         return None
 
     def get_container_memory_utilization_staging(self) -> None:
@@ -125,13 +150,15 @@ class GoogleMetrics:
         results = self.client.list_time_series(request=request)
 
         for result in results:
-            self.data["memory_utilization"].append(
-                {
-                    "machine": result.resource.labels["container_name"],
-                    "utilization": round(result.points[-1].value.double_value, 3),
-                    "env": result.resource.labels["namespace_name"],
-                }
-            )
+            machine_name = result.resource.labels["container_name"]
+            memory_utilization = round(result.points[-1].value.double_value, 3)
+            env = result.resource.labels["namespace_name"]
+            if machine_name in self.data:
+                self.data[machine_name]["memory_utilization"] = memory_utilization
+                self.data[machine_name]["env"] = env
+            else:
+                self.data[machine_name] = {"memory_utilization": memory_utilization}
+                self.data[machine_name]["env"] = env
         return None
 
     def get_container_memory_utilization_prod(self) -> None:
@@ -148,13 +175,15 @@ class GoogleMetrics:
         results = self.client.list_time_series(request=request)
 
         for result in results:
-            self.data["memory_utilization"].append(
-                {
-                    "machine": result.resource.labels["container_name"],
-                    "utilization": round(result.points[-1].value.double_value, 3),
-                    "env": result.resource.labels["namespace_name"],
-                }
-            )
+            machine_name = result.resource.labels["container_name"]
+            memory_utilization = round(result.points[-1].value.double_value, 3)
+            env = result.resource.labels["namespace_name"]
+            if machine_name in self.data:
+                self.data[machine_name]["memory_utilization"] = memory_utilization
+                self.data[machine_name]["env"] = env
+            else:
+                self.data[machine_name] = {"memory_utilization": memory_utilization}
+                self.data[machine_name]["env"] = env
         return None
 
     # BUG: metric_type returns request cores 6 instead of limit cores 8
@@ -171,13 +200,15 @@ class GoogleMetrics:
         results = self.client.list_time_series(request=request)
 
         for result in results:
-            self.data["cpu_utilization"].append(
-                {
-                    "cpu_limit": result.points[-1].value.double_value,
-                    "env": result.resource.labels["namespace_name"],
-                    "machine": result.resource.labels["container_name"],
-                }
-            )
+            machine_name = result.resource.labels["container_name"]
+            env = result.resource.labels["namespace_name"]
+            cpu_limit = result.points[-1].value.double_value
+            if machine_name in self.data:
+                self.data[machine_name]["cpu_limit"] = cpu_limit
+                self.data[machine_name]["env"] = env
+            else:
+                self.data[machine_name] = {"cpu_limit": cpu_limit}
+                self.data[machine_name]["env"] = env
         return None
 
     # BUG: metric_type returns request cores 6 instead of limit cores 8
@@ -194,13 +225,15 @@ class GoogleMetrics:
         results = self.client.list_time_series(request=request)
 
         for result in results:
-            self.data["cpu_utilization"].append(
-                {
-                    "cpu_limit": result.points[-1].value.double_value,
-                    "env": result.resource.labels["namespace_name"],
-                    "machine": result.resource.labels["container_name"],
-                }
-            )
+            machine_name = result.resource.labels["container_name"]
+            env = result.resource.labels["namespace_name"]
+            cpu_limit = result.points[-1].value.double_value
+            if machine_name in self.data:
+                self.data[machine_name]["cpu_limit"] = cpu_limit
+                self.data[machine_name]["env"] = env
+            else:
+                self.data[machine_name] = {"cpu_limit": cpu_limit}
+                self.data[machine_name]["env"] = env
         return None
 
     # BUG: metric_type returns request bytes 12 Gi instead of limit bytes 16 Gi
@@ -217,13 +250,15 @@ class GoogleMetrics:
         results = self.client.list_time_series(request=request)
 
         for result in results:
-            self.data["memory_utilization"].append(
-                {
-                    "memory_limit": result.points[-1].value.int64_value / 1e+9, # Gi
-                    "env": result.resource.labels["namespace_name"],
-                    "machine": result.resource.labels["container_name"],
-                }
-            )
+            machine_name = result.resource.labels["container_name"]
+            env = result.resource.labels["namespace_name"]
+            memory_limit = result.points[-1].value.int64_value / 1e+9 # Gi
+            if machine_name in self.data:
+                self.data[machine_name]["memory_limit"] = memory_limit
+                self.data[machine_name]["env"] = env
+            else:
+                self.data[machine_name] = {"memory_limit": memory_limit}
+                self.data[machine_name]["env"] = env
         return None
 
     # BUG: metric_type returns request bytes 12 Gi instead of limit bytes 16 Gi
@@ -240,13 +275,15 @@ class GoogleMetrics:
         results = self.client.list_time_series(request=request)
 
         for result in results:
-            self.data["memory_utilization"].append(
-                {
-                    "memory_limit": result.points[-1].value.int64_value / 1e+9, # Gi
-                    "env": result.resource.labels["namespace_name"],
-                    "machine": result.resource.labels["container_name"],
-                }
-            )
+            machine_name = result.resource.labels["container_name"]
+            env = result.resource.labels["namespace_name"]
+            memory_limit = result.points[-1].value.int64_value / 1e+9 # Gi
+            if machine_name in self.data:
+                self.data[machine_name]["memory_limit"] = memory_limit
+                self.data[machine_name]["env"] = env
+            else:
+                self.data[machine_name] = {"memory_limit": memory_limit}
+                self.data[machine_name]["env"] = env
         return None
 
     def get_data(self):
