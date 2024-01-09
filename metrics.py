@@ -36,10 +36,10 @@ class GoogleMetrics:
             cpu_utilization = "{} %".format(round(vm.points[-1].value.double_value * 100, 3))
             if machine_name in self.data:
                 self.data[machine_name]["cpu_utilization"] = cpu_utilization
-                self.data[machine_name]["env"] = "VM"
+                self.data[machine_name]["env"] = "VM/Cluster node"
             else:
                 self.data[machine_name] = {"cpu_utilization": cpu_utilization}
-                self.data[machine_name]["env"] = "VM" 
+                self.data[machine_name]["env"] = "VM/Cluster node" 
         return None
 
     def get_memory_utilization_for_vms(self) -> None:
@@ -71,19 +71,19 @@ class GoogleMetrics:
             memory_utilization = "{} %".format(round(result.points[-1].value.double_value, 3))
             if machine_name in self.data:
                 self.data[machine_name]["memory_utilization"] = memory_utilization
-                self.data[machine_name]["env"] = "VM"
+                self.data[machine_name]["env"] = "VM/Cluster node"
             else:
                 self.data[machine_name] = {"memory_utilization": memory_utilization}
-                self.data[machine_name]["env"] = "VM" 
+                self.data[machine_name]["env"] = "VM/Cluster node" 
 
             # machine_name = result.resource.labels["instance_id"]
             # memory_utilization = round(result.points[-1].value.double_value, 3)
             # if machine_name in self.data:
             #     self.data[machine_name]["memory_utilization"] = memory_utilization
-            #     self.data[machine_name]["env"] = "VM"
+            #     self.data[machine_name]["env"] = "VM/Cluster node"
             # else:
             #     self.data[machine_name] = {"memory_utilization": memory_utilization}
-            #     self.data[machine_name]["env"] = "VM" 
+            #     self.data[machine_name]["env"] = "VM/Cluster node" 
         return None
 
     def get_container_cpu_utilization_staging(self) -> None:
@@ -101,7 +101,7 @@ class GoogleMetrics:
 
         for result in results:
             machine_name = result.resource.labels["container_name"]
-            cpu_utilization = round(result.points[-1].value.double_value, 3)
+            cpu_utilization = "{} %".format(round(result.points[-1].value.double_value, 3))
             env = result.resource.labels["namespace_name"]
             if machine_name in self.data:
                 self.data[machine_name]["cpu_utilization"] = cpu_utilization
@@ -126,7 +126,7 @@ class GoogleMetrics:
 
         for result in results:
             machine_name = result.resource.labels["container_name"]
-            cpu_utilization = round(result.points[-1].value.double_value, 3)
+            cpu_utilization = "{} %".format(round(result.points[-1].value.double_value, 3))
             env = result.resource.labels["namespace_name"]
             if machine_name in self.data:
                 self.data[machine_name]["cpu_utilization"] = cpu_utilization
@@ -151,7 +151,7 @@ class GoogleMetrics:
 
         for result in results:
             machine_name = result.resource.labels["container_name"]
-            memory_utilization = round(result.points[-1].value.double_value, 3)
+            memory_utilization = "{} %".format(round(result.points[-1].value.double_value, 3))
             env = result.resource.labels["namespace_name"]
             if machine_name in self.data:
                 self.data[machine_name]["memory_utilization"] = memory_utilization
@@ -176,7 +176,7 @@ class GoogleMetrics:
 
         for result in results:
             machine_name = result.resource.labels["container_name"]
-            memory_utilization = round(result.points[-1].value.double_value, 3)
+            memory_utilization = "{} %".format(round(result.points[-1].value.double_value, 3))
             env = result.resource.labels["namespace_name"]
             if machine_name in self.data:
                 self.data[machine_name]["memory_utilization"] = memory_utilization
@@ -202,7 +202,7 @@ class GoogleMetrics:
         for result in results:
             machine_name = result.resource.labels["container_name"]
             env = result.resource.labels["namespace_name"]
-            cpu_limit = result.points[-1].value.double_value
+            cpu_limit = "{} cores".format(result.points[-1].value.double_value)
             if machine_name in self.data:
                 self.data[machine_name]["cpu_limit"] = cpu_limit
                 self.data[machine_name]["env"] = env
@@ -227,7 +227,7 @@ class GoogleMetrics:
         for result in results:
             machine_name = result.resource.labels["container_name"]
             env = result.resource.labels["namespace_name"]
-            cpu_limit = result.points[-1].value.double_value
+            cpu_limit = "{} cores".format(result.points[-1].value.double_value)
             if machine_name in self.data:
                 self.data[machine_name]["cpu_limit"] = cpu_limit
                 self.data[machine_name]["env"] = env
@@ -252,7 +252,7 @@ class GoogleMetrics:
         for result in results:
             machine_name = result.resource.labels["container_name"]
             env = result.resource.labels["namespace_name"]
-            memory_limit = result.points[-1].value.int64_value / 1e+9 # Gi
+            memory_limit = "{} Gi".format(result.points[-1].value.int64_value / 1e+9) # Gi
             if machine_name in self.data:
                 self.data[machine_name]["memory_limit"] = memory_limit
                 self.data[machine_name]["env"] = env
@@ -277,7 +277,7 @@ class GoogleMetrics:
         for result in results:
             machine_name = result.resource.labels["container_name"]
             env = result.resource.labels["namespace_name"]
-            memory_limit = result.points[-1].value.int64_value / 1e+9 # Gi
+            memory_limit = "{} Gi".format(result.points[-1].value.int64_value / 1e+9) # Gi
             if machine_name in self.data:
                 self.data[machine_name]["memory_limit"] = memory_limit
                 self.data[machine_name]["env"] = env
@@ -286,6 +286,54 @@ class GoogleMetrics:
                 self.data[machine_name]["env"] = env
         return None
 
+
+    def get_node_memory_utilization(self) -> None:
+        
+        metric_type = "kubernetes.io/node/memory/used_bytes"
+        query = f'resource.type="k8s_node" AND metric.type="{metric_type}" AND metric.labels.memory_type="non-evictable"'
+        request = {
+            "name": self.project,
+            "filter": query,
+            "interval": self.interval,
+            "view": ListTimeSeriesRequest.TimeSeriesView.FULL,
+            "aggregation": self.aggregation,
+        }
+
+        results = self.client.list_time_series(request=request)
+        
+        for result in results:
+            memory_used = result.points[-1].value.double_value / 1e+9 # Gi
+
+            metric_type_total = "kubernetes.io/node/memory/total_bytes"
+            query_total = f'resource.type="k8s_node" AND metric.type="{metric_type_total}" '
+            request_total = {
+                "name": self.project,
+                "filter": query_total,
+                "interval": self.interval,
+                "view": ListTimeSeriesRequest.TimeSeriesView.FULL,
+                "aggregation": self.aggregation,
+            }
+
+            results_total = self.client.list_time_series(request=request_total)
+            
+            for result_total in results_total:
+                machine_name = result_total.resource.labels["node_name"]
+                memory_total = result_total.points[-1].value.double_value / 1e+9 # Gi
+                memory_utilization = memory_used / memory_total * 100
+                if machine_name in self.data:
+                    self.data[machine_name]["memory_utilization"] = memory_utilization
+                else:
+                    self.data[machine_name] = {"memory_utilization": memory_utilization}
+            return None
+
+        # for result in results:
+        #     machine_name = result.resource.labels["node_name"]
+        #     memory_utilization = result.points[-1].value.double_value / 1e+9
+        #     if machine_name in self.data:
+        #         self.data[machine_name]["memory_utilization"] = memory_utilization
+        #     else:
+        #         self.data[machine_name] = {"memory_utilization": memory_utilization}
+        # return None
     def get_data(self):
         self.get_cpu_utilization_for_vms()
         self.get_memory_utilization_for_vms()
@@ -297,4 +345,5 @@ class GoogleMetrics:
         self.get_container_cpu_limit_prod()
         self.get_container_memory_limit_staging()
         self.get_container_memory_limit_prod()
+        self.get_node_memory_utilization()
         return self.data

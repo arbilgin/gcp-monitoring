@@ -5,23 +5,31 @@ from google.cloud.monitoring_v3 import (Aggregation, ListTimeSeriesRequest,
                                         MetricServiceClient, TimeInterval)
 
 
-def get_instance_name():
+def get_node_memory_utilization():
     client = monitoring_v3.MetricServiceClient()
-    project_id = "greenlink-platform-396912"
+    project = f"projects/greenlink-platform-396912"
     interval = monitoring_v3.TimeInterval(
         {
             "end_time": {"seconds": int(time.time())},
             "start_time": {"seconds": int(time.time()) - 60 * 10},
         }
     )
-
-    filter_str = f'resource.type="gce_instance" AND metric.type="compute.googleapis.com/instance/cpu/utilization"'
-    results = client.list_time_series(
-        name=f'projects/{project_id}',
-        filter=filter_str,
-        interval=interval,
-        view=ListTimeSeriesRequest.TimeSeriesView.FULL,
+    aggregation = monitoring_v3.Aggregation(
+        {
+            "alignment_period": {"seconds": 60 * 10},
+            "per_series_aligner": monitoring_v3.Aggregation.Aligner.ALIGN_MEAN,
+        }
     )
+    metric_type = "kubernetes.io/node/memory/total_bytes"
+    query = f'resource.type="k8s_node" AND metric.type="{metric_type}" '
+    request = {
+        "name": project,
+        "filter": query,
+        "interval": interval,
+        "view": ListTimeSeriesRequest.TimeSeriesView.FULL,
+        "aggregation": aggregation,
+    }
+    results = client.list_time_series(request=request)
     
     for result in results:
         # instance_name = result.resource.labels['instance_name']
@@ -29,4 +37,4 @@ def get_instance_name():
         print(result)
     
 if __name__ == "__main__":
-    get_instance_name()
+    get_node_memory_utilization()
