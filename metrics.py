@@ -289,6 +289,20 @@ class GoogleMetrics:
 
     def get_node_memory_utilization(self) -> None:
         
+        # 1 - GET TOTAL BYTES
+        metric_type_total = "kubernetes.io/node/memory/total_bytes"
+        query_total = f'resource.type="k8s_node" AND metric.type="{metric_type_total}" '
+        request_total = {
+            "name": self.project,
+            "filter": query_total,
+            "interval": self.interval,
+            "view": ListTimeSeriesRequest.TimeSeriesView.FULL,
+            "aggregation": self.aggregation,
+        }
+
+        total_bytes_results = self.client.list_time_series(request=request_total)
+
+        # 2 - GET USED BYTES
         metric_type = "kubernetes.io/node/memory/used_bytes"
         query = f'resource.type="k8s_node" AND metric.type="{metric_type}" AND metric.labels.memory_type="non-evictable"'
         request = {
@@ -299,32 +313,22 @@ class GoogleMetrics:
             "aggregation": self.aggregation,
         }
 
-        results = self.client.list_time_series(request=request)
+        used_bytes_results = list(self.client.list_time_series(request=request)) # 6 nodes
         
-        for result in results:
-            memory_used = result.points[-1].value.double_value / 1e+9 # Gi
+        # Calculate total and used bytes
+        n = 0
+        for each in total_bytes_results:
+            machine_name = each.resource.labels["node_name"]
+            memory_total = each.points[-1].value.double_value / 1e+9 # Gi
+            memory_used = used_bytes_results[n].points[-1].value.double_value / 1e+9 # Gi
+            memory_utilization = memory_used / memory_total * 100
+            if machine_name in self.data:
+                self.data[machine_name]["memory_utilization"] = f"{round(memory_utilization, 2)}%"
+            else:
+                self.data[machine_name] = {"memory_utilization": f"{round(memory_utilization, 2)}%"}
+            n += 1
 
-            metric_type_total = "kubernetes.io/node/memory/total_bytes"
-            query_total = f'resource.type="k8s_node" AND metric.type="{metric_type_total}" '
-            request_total = {
-                "name": self.project,
-                "filter": query_total,
-                "interval": self.interval,
-                "view": ListTimeSeriesRequest.TimeSeriesView.FULL,
-                "aggregation": self.aggregation,
-            }
-
-            results_total = self.client.list_time_series(request=request_total)
-            
-            for result_total in results_total:
-                machine_name = result_total.resource.labels["node_name"]
-                memory_total = result_total.points[-1].value.double_value / 1e+9 # Gi
-                memory_utilization = memory_used / memory_total * 100
-                if machine_name in self.data:
-                    self.data[machine_name]["memory_utilization"] = memory_utilization
-                else:
-                    self.data[machine_name] = {"memory_utilization": memory_utilization}
-            return None
+        return None
 
         # for result in results:
         #     machine_name = result.resource.labels["node_name"]
@@ -341,9 +345,9 @@ class GoogleMetrics:
         self.get_container_cpu_utilization_prod()
         self.get_container_memory_utilization_staging()
         self.get_container_memory_utilization_prod()
-        self.get_container_cpu_limit_staging()
         self.get_container_cpu_limit_prod()
+        self.get_container_cpu_limit_staging()
         self.get_container_memory_limit_staging()
         self.get_container_memory_limit_prod()
-        self.get_node_memory_utilization()
+        # self.get_node_memory_utilization()
         return self.data
