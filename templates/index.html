@@ -26,21 +26,35 @@
         <thead>
             <tr>
                 <th>Server</th>
-                <th>Env</th>
-                <th>CPU Usage/Limit</th>
-                <th>Memory Usage/Limit</th>
+                <th>Environment</th>
+                <th>CPU Utilization/Limit</th>
+                <th>Memory Utilization/Limit</th>
             </tr>
         </thead>
         <tbody>
-            {% for entry in response %}
+            {% for machine_name, values in response.items() %}
                 <tr>
-                    <td>{{ entry['machine_name'] }}</td>
-                    <td>{{ entry['environment'] }}</td>
-                    <td>{{ entry['cpu_usage'] }}/{{ entry['cpu_limit'] }}</td>
-                    <td>{{ entry['memory_usage'] }}/{{ entry['memory_limit'] }}</td>
+                    <td>{{ machine_name }}</td>
+                    <td>{{ values['env'] }}</td>
+                    <td>{{ values['cpu_utilization'] }} / {{ values['cpu_limit'] }} </td>
+                    <td>{{ values['memory_utilization'] }} / {{ values['memory_limit'] }} </td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+    <footer>
+        <p><a href="https://blok-z.com" target="_blank">Blok-Z</a></p>
+        <style>
+                footer {
+                    font: bold 18px Helvetica;
+                    color: #008b2e;
+                    position: fixed;
+                    left: 0;
+                    bottom: 0;
+                    width: 100%;
+                    text-align: center;
+                }
+            </style>
+    </footer>
 </body>
 </html>

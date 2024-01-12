@@ -27,15 +27,8 @@ def setup_metrics():
     return metrics
 
 
-@app.route("/")
-def index():
-    metrics = setup_metrics()
-    data = metrics.get_data()
-    from pprint import pprint
+metrics = setup_metrics()
+data = metrics.get_data()
+from pprint import pprint
 
-    pprint(data)
-    return render_template("index.html", response=data)
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
+pprint(data)

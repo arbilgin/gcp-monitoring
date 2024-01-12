@@ -68,22 +68,22 @@ interval = monitoring_v3.TimeInterval(
         "start_time": {"seconds": (seconds - 240), "nanos": nanos},
     }
 )
-results = client.list_time_series(
-    request={
-        "name": project_name,
-        "filter": 'metric.type = "compute.googleapis.com/instance/cpu/utilization" ',
-        "interval": interval,
-        "view": monitoring_v3.ListTimeSeriesRequest.TimeSeriesView.FULL,
-    }
-)
-for result in results:
-    print(result)
-#     for point in result.points:
-#         print(point.value.double_value)
-
-
-# resource_path = (
-#     f"projects/greenlink-platform-396912/monitoredResourceDescriptors/gce_instance"
+# results = client.list_time_series(
+#     request={
+#         "name": project_name,
+#         "filter": 'metric.type = "compute.googleapis.com/instance/cpu/utilization" ',
+#         "interval": interval,
+#         "view": monitoring_v3.ListTimeSeriesRequest.TimeSeriesView.FULL,
+#     }
 # )
-# descriptor = client.get_monitored_resource_descriptor(name=resource_path)
-# print(descriptor)
+# for result in results:
+#     print(result)
+# #     for point in result.points:
+# #         print(point.value.double_value)
+
+
+resource_path = (
+    f"projects/greenlink-platform-396912/monitoredResourceDescriptors/gce_instance"
+)
+descriptor = client.get_monitored_resource_descriptor(name=resource_path)
+print(descriptor)

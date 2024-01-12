@@ -1,2 +1,5 @@
 .venv
 poetry.lock
+__pycache__
+# Ignore all .pyc files
+*.pyc
