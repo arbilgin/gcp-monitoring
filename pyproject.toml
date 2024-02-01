@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gcp-monitoring"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = ["arbilgin <arda.bilgin@blok-z.com>"]
 readme = "README.md"
@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.10"
 google-cloud-monitoring = "^2.18.0"
 flask = "^3.0.0"
+flask-httpauth = "^4.8.0"
 
 
 [tool.poetry.group.dev.dependencies]

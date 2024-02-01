@@ -111,7 +111,7 @@ class GoogleMetrics:
         results = self.client.list_time_series(request=request)
 
         for result in results:
-            machine_name = result.resource.labels["container_name"] + "-" + result.resource.labels["namespace_name"]
+            machine_name = result.resource.labels["container_name"] + "-" + result.resource.labels["namespace_name"] + "-container"
             cpu_utilization = "{} %".format(round(result.points[-1].value.double_value, 4))
             env = result.resource.labels["namespace_name"]
             if machine_name in self.data:
@@ -136,7 +136,7 @@ class GoogleMetrics:
         results = self.client.list_time_series(request=request)
 
         for result in results:
-            machine_name = result.resource.labels["container_name"] + "-" + result.resource.labels["namespace_name"]
+            machine_name = result.resource.labels["container_name"] + "-" + result.resource.labels["namespace_name"] + "-container"
             cpu_utilization = "{} %".format(round(result.points[-1].value.double_value, 4))
             env = result.resource.labels["namespace_name"]
             if machine_name in self.data:
@@ -161,7 +161,7 @@ class GoogleMetrics:
         results = self.client.list_time_series(request=request)
 
         for result in results:
-            machine_name = result.resource.labels["container_name"] + "-" + result.resource.labels["namespace_name"]
+            machine_name = result.resource.labels["container_name"] + "-" + result.resource.labels["namespace_name"] + "-container"
             memory_utilization = "{} %".format(round(result.points[-1].value.double_value, 5))
             env = result.resource.labels["namespace_name"]
             if machine_name in self.data:
@@ -186,7 +186,7 @@ class GoogleMetrics:
         results = self.client.list_time_series(request=request)
 
         for result in results:
-            machine_name = result.resource.labels["container_name"] + "-" + result.resource.labels["namespace_name"]
+            machine_name = result.resource.labels["container_name"] + "-" + result.resource.labels["namespace_name"] + "-container"
             memory_utilization = "{} %".format(round(result.points[-1].value.double_value, 5))
             env = result.resource.labels["namespace_name"]
             if machine_name in self.data:
@@ -211,7 +211,7 @@ class GoogleMetrics:
         results = self.client.list_time_series(request=request)
 
         for result in results:
-            machine_name = result.resource.labels["container_name"] + "-" + result.resource.labels["namespace_name"]
+            machine_name = result.resource.labels["container_name"] + "-" + result.resource.labels["namespace_name"] + "-container"
             env = result.resource.labels["namespace_name"]
             cpu_limit = "{} cores".format(result.points[-1].value.double_value)
             if machine_name in self.data:
@@ -236,7 +236,7 @@ class GoogleMetrics:
         results = self.client.list_time_series(request=request)
 
         for result in results:
-            machine_name = result.resource.labels["container_name"] + "-" + result.resource.labels["namespace_name"]
+            machine_name = result.resource.labels["container_name"] + "-" + result.resource.labels["namespace_name"] + "-container"
             env = result.resource.labels["namespace_name"]
             cpu_limit = "{} cores".format(result.points[-1].value.double_value)
             if machine_name in self.data:
@@ -261,7 +261,7 @@ class GoogleMetrics:
         results = self.client.list_time_series(request=request)
 
         for result in results:
-            machine_name = result.resource.labels["container_name"] + "-" + result.resource.labels["namespace_name"]
+            machine_name = result.resource.labels["container_name"] + "-" + result.resource.labels["namespace_name"] + "-container"
             env = result.resource.labels["namespace_name"]
             memory_limit = "{} Gi".format(result.points[-1].value.int64_value / 1e+9) # Gi
             if machine_name in self.data:
@@ -286,7 +286,7 @@ class GoogleMetrics:
         results = self.client.list_time_series(request=request)
 
         for result in results:
-            machine_name = result.resource.labels["container_name"] + "-" + result.resource.labels["namespace_name"]
+            machine_name = result.resource.labels["container_name"] + "-" + result.resource.labels["namespace_name"] + "-container"
             env = result.resource.labels["namespace_name"]
             memory_limit = "{} Gi".format(result.points[-1].value.int64_value / 1e+9) # Gi
             if machine_name in self.data:
